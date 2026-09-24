@@ -1,0 +1,9 @@
+{
+  "name": "yben-edit-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YBEN EDIT — video editor portfolio (static site, no build step)",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
