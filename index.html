@@ -104,6 +104,8 @@ nav .wrap{height:auto;padding:10px 0 8px;flex-wrap:wrap;row-gap:6px}
 .about{max-width:680px;margin-inline:auto;text-align:center}
 .about p{color:var(--muted);margin:0 auto 16px;max-width:60ch}
 .about p:first-of-type{color:var(--cream);font-size:clamp(18px,2.2vw,21px)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);z-index:60;max-width:calc(100% - 32px);padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:center;font-size:14px;background:rgba(42,33,28,.86)}
+.toast .btn{padding:7px 14px;font-size:13px}
 /* book + contact */
 .book{padding:clamp(36px,6vw,64px) clamp(22px,5vw,56px);text-align:center}
 .book .sub{margin:0 auto 28px}
@@ -212,7 +214,8 @@ const SITE = {
   aboutPhoto: ""
 };
 
-// Your main showreel. Leave src "" to hide the Showreel section.
+// Your main showreel. src = video link. poster = your custom cover image (optional),
+// shown before the video starts playing.
 const SHOWREEL = { src: "", poster: "" };
 
 // Social links: edit everything here. Any link left as "" is hidden automatically.
@@ -225,7 +228,7 @@ const SOCIALS = {
   instagram: "",
   youtube:   "",
   fiverr:    "",
-  email:     ""
+  email:     "younesedits007@gmail.com"
 };
 
 /* ---------- PROJECTS ----------
@@ -235,7 +238,10 @@ const SOCIALS = {
              "short" -> Short Form (Shorts, Reels, TikTok, ads...)
    kind:     "client" -> real client work
              "spec"   -> spec edit / personal project (shown with a label)
-   thumbnail and description are optional.
+   thumbnail = your custom cover image (a link, or a file like "assets/cover1.jpg").
+     It is shown on the card AND on the video before it starts playing.
+     Leave it out and the first frame of the video is used instead.
+   description is optional.
 
    Example (remove the // to use it):
    { title: "Project name", category: "long", kind: "client",
@@ -279,7 +285,7 @@ const person = p => p.photo ? avatar(p) : initial(p.name);
 
 /* One video at a time, everywhere (Long, Short, Showreel, modal, mobile) */
 document.addEventListener('play', e => {
-  document.querySelectorAll('video').forEach(v => { if (v !== e.target && !v.paused) v.pause(); });
+  document.querySelectorAll('video').forEach(v => { if (v !== e.target) v.pause(); });
 }, true);
 
 /* reveal on scroll */
@@ -297,7 +303,7 @@ document.querySelectorAll('[data-book]').forEach(a => a.href = SITE.bookUrl);
 
 /* showreel: section always visible; video appears once a link is added */
 if (SHOWREEL.src) {
-  const v = $('#reelVideo'); v.src = SHOWREEL.src;
+  const v = $('#reelVideo'); v.preload = 'auto'; v.src = SHOWREEL.src;
   if (SHOWREEL.poster) v.poster = SHOWREEL.poster;
   v.hidden = false; $('#reelEmpty').hidden = true;
 }
@@ -308,15 +314,26 @@ const CATS = [['long', 'Long Form'], ['short', 'Short Form']];
 const modal = $('#modal'), modalBox = $('#modalBox');
 const empty = msg => h('div', { class: 'empty rv' }, msg);
 
+/* One shared player: it is pre-loaded when you hover/touch a card, so it starts instantly */
+const player = h('video', { controls: '', playsinline: '', preload: 'auto' });
+const cap = h('div', { class: 'cap' });
+function warm(p) {
+  if (!player.paused || player.dataset.src === p.video) return;
+  player.dataset.src = p.video; player.src = p.video; player.load();
+}
 function openProject(p) {
-  const v = h('video', { src: p.video, controls: '', playsinline: '', autoplay: '' });
-  modalBox.replaceChildren(v, h('div', { class: 'cap' }, p.title));
+  closeAll();                                   /* stop every other video and its audio first */
+  if (player.dataset.src !== p.video) { player.dataset.src = p.video; player.src = p.video; }
+  if (p.thumbnail) player.poster = p.thumbnail; else player.removeAttribute('poster');
+  try { player.currentTime = 0; } catch (_) {}
+  cap.textContent = p.title;
+  modalBox.replaceChildren(player, cap);
   modal.classList.add('open'); document.body.style.overflow = 'hidden';
-  v.play().catch(() => {});
+  player.play().catch(() => {});
 }
 function closeModal() {
-  modalBox.querySelectorAll('video').forEach(v => v.pause());
-  modalBox.replaceChildren(); modal.classList.remove('open'); document.body.style.overflow = '';
+  player.pause();
+  modal.classList.remove('open'); document.body.style.overflow = '';
 }
 $('#closeModal').onclick = closeModal;
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
@@ -326,13 +343,16 @@ function card(p) {
   const media = p.thumbnail
     ? h('img', { src: p.thumbnail, alt: p.title, loading: 'lazy' })
     : h('video', { src: p.video + '#t=0.5', muted: '', playsinline: '', preload: 'metadata' });
-  return h('button', { class: 'card glass rv', type: 'button', onclick: () => openProject(p) },
+  const b = h('button', { class: 'card glass rv', type: 'button', onclick: () => openProject(p) },
     h('div', { class: 'thumb' }, media, h('span', { class: 'play' })),
     h('div', { class: 'info' },
       p.kind === 'spec' ? h('span', { class: 'tag' }, 'Spec Edit · Personal Project') : null,
       h('h3', {}, p.title),
       p.style ? h('div', { class: 'meta' }, p.style) : null,
       p.description ? h('p', {}, p.description) : null));
+  ['pointerenter', 'focus'].forEach(ev => b.addEventListener(ev, () => warm(p)));
+  b.addEventListener('touchstart', () => warm(p), { passive: true });
+  return b;
 }
 function renderWork(cat, label) {
   const list = VALID.filter(p => p.category === cat);
@@ -384,6 +404,33 @@ const ICONS = {
   fiverr: '<text x="12" y="16.6" text-anchor="middle" font-size="12.5" font-weight="800" font-family="Manrope,system-ui,sans-serif">fi</text>',
   email: '<path d="M3 6h18v12H3zM3.4 6.6L12 13l8.6-6.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>'
 };
+function showMailToast(addr) {
+  let t = $('#mailToast');
+  if (!t) { t = h('div', { id: 'mailToast', class: 'toast glass', role: 'status' }); document.body.append(t); }
+  const copy = h('button', { class: 'btn', type: 'button' }, 'Copy');
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(addr); }
+    catch (_) {
+      const ta = h('textarea', { style: 'position:fixed;opacity:0' }); ta.value = addr;
+      document.body.append(ta); ta.select(); try { document.execCommand('copy'); } catch (__) {} ta.remove();
+    }
+    copy.textContent = 'Copied';
+  });
+  const gm = h('a', { class: 'btn', href: 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(addr), target: '_blank', rel: 'noopener noreferrer' }, 'Open Gmail');
+  t.replaceChildren(h('span', {}, addr), copy, gm);
+  t.hidden = false; clearTimeout(t._t); t._t = setTimeout(() => { t.hidden = true; }, 10000);
+}
+function openMail(e, addr) {
+  e.preventDefault();
+  let moved = false; const mark = () => { moved = true; };
+  window.addEventListener('blur', mark, { once: true });
+  document.addEventListener('visibilitychange', mark, { once: true });
+  window.addEventListener('pagehide', mark, { once: true });
+  const url = 'mailto:' + addr;
+  try { (window.top || window).location.href = url; } catch (_) { window.location.href = url; }
+  /* if nothing took over (no mail app / blocked preview), offer copy + Gmail */
+  setTimeout(() => { if (!moved) showMailToast(addr); }, 1200);
+}
 const SOCIAL_META = [['x', 'X'], ['telegram', 'Telegram'], ['linkedin', 'LinkedIn'], ['instagram', 'Instagram'], ['youtube', 'YouTube'], ['fiverr', 'Fiverr'], ['email', 'Email']];
 $('#social').replaceChildren(...SOCIAL_META
   .filter(([id]) => (SOCIALS[id] || '').trim())
@@ -392,6 +439,7 @@ $('#social').replaceChildren(...SOCIAL_META
     const a = id === 'email'
       ? h('a', { href: v.startsWith('mailto:') ? v : 'mailto:' + v })
       : h('a', { href: v, target: '_blank', rel: 'noopener noreferrer' });
+    if (id === 'email') a.addEventListener('click', e => openMail(e, v.replace(/^mailto:/, '')));
     a.setAttribute('aria-label', label); a.title = label;
     a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[id] + '</svg>';
     return a;
