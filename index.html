@@ -279,21 +279,21 @@ const PROJECTS = [
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    video: "videos/short/short-01.mp4"
+    video: "https://drive.google.com/file/d/1KqhfXcKJrtddNUiqvbRlhvKRqFg8t_hz/preview"
   },
   {
     title: "Short Form Edit 02",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    video: "videos/short/short-02.mp4"
+    video: "https://drive.google.com/file/d/1JzFV8ZOaRMjfJ2ak_83M3LOb1FCL4H7U/preview"
   },
   {
     title: "Short Form Edit 03",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    video: "videos/short/short-03.mp4"
+    video: "https://drive.google.com/file/d/1LLIyJk5SiS23-r4IZg2qCatptHpX9ZuN/preview"
   }
 ];
 
@@ -358,25 +358,33 @@ const CATS = [['long', 'Long Form'], ['short', 'Short Form']];
 const modal = $('#modal'), modalBox = $('#modalBox');
 const empty = msg => h('div', { class: 'empty rv' }, msg);
 
-/* One shared player: it is pre-loaded when you hover/touch a card, so it starts instantly */
+/* Shared player for direct video files; Google Drive videos use an embed iframe. */
 const player = h('video', { controls: '', playsinline: '', preload: 'auto' });
 const cap = h('div', { class: 'cap' });
+function isDrive(p) { return /drive\.google\.com\/file\/d\//.test(p.video); }
+function driveId(url) { const m = url.match(/drive\.google\.com\/file\/d\/([^/]+)/); return m ? m[1] : ''; }
 function warm(p) {
-  if (!player.paused || player.dataset.src === p.video) return;
+  if (isDrive(p) || !player.paused || player.dataset.src === p.video) return;
   player.dataset.src = p.video; player.src = p.video; player.load();
 }
 function openProject(p) {
-  closeAll();                                   /* stop every other video and its audio first */
-  if (player.dataset.src !== p.video) { player.dataset.src = p.video; player.src = p.video; }
-  if (p.thumbnail) player.poster = p.thumbnail; else player.removeAttribute('poster');
-  try { player.currentTime = 0; } catch (_) {}
+  closeAll();
   cap.textContent = p.title;
-  modalBox.replaceChildren(player, cap);
+  if (isDrive(p)) {
+    const frame = h('iframe', { src: p.video, title: p.title, allow: 'autoplay; fullscreen; picture-in-picture', allowfullscreen: '', loading: 'eager', style: 'width:min(960px,90vw);height:min(78vh,540px);border:0;border-radius:16px;background:#000' });
+    modalBox.replaceChildren(frame, cap);
+  } else {
+    if (player.dataset.src !== p.video) { player.dataset.src = p.video; player.src = p.video; }
+    if (p.thumbnail) player.poster = p.thumbnail; else player.removeAttribute('poster');
+    try { player.currentTime = 0; } catch (_) {}
+    modalBox.replaceChildren(player, cap);
+  }
   modal.classList.add('open'); document.body.style.overflow = 'hidden';
-  player.play().catch(() => {});
+  if (!isDrive(p)) player.play().catch(() => {});
 }
 function closeModal() {
   player.pause();
+  modalBox.querySelectorAll('iframe').forEach(frame => frame.remove());
   modal.classList.remove('open'); document.body.style.overflow = '';
 }
 $('#closeModal').onclick = closeModal;
@@ -384,9 +392,12 @@ modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 function card(p) {
+  const id = isDrive(p) ? driveId(p.video) : '';
   const media = p.thumbnail
     ? h('img', { src: p.thumbnail, alt: p.title, loading: 'lazy' })
-    : h('video', { src: p.video + '#t=0.5', muted: '', playsinline: '', preload: 'metadata' });
+    : id
+      ? h('img', { src: 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1000', alt: p.title, loading: 'lazy' })
+      : h('video', { src: p.video + '#t=0.5', muted: '', playsinline: '', preload: 'metadata' });
   const b = h('button', { class: 'card glass rv', type: 'button', onclick: () => openProject(p) },
     h('div', { class: 'thumb' }, media, h('span', { class: 'play' })),
     h('div', { class: 'info' },
