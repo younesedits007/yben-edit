@@ -69,7 +69,7 @@ nav .wrap{height:auto;padding:10px 0 8px;flex-wrap:wrap;row-gap:6px}
 .card:hover{transform:translateY(-4px);border-color:rgba(198,166,107,.5)}
 .thumb{position:relative;aspect-ratio:16/9;background:var(--bg2);overflow:hidden}
 .short .thumb{aspect-ratio:9/16}
-.thumb img,.thumb video{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.thumb img,.thumb video,.thumb .external-thumb{width:100%;height:100%;object-fit:cover;transition:transform .6s}.thumb .external-thumb{display:block;background:radial-gradient(ellipse at 50% 45%,rgba(198,166,107,.24),transparent 55%),linear-gradient(135deg,#30251f,#151210 65%,#443326)}
 .card:hover .thumb img,.card:hover .thumb video{transform:scale(1.04)}
 .play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;background:rgba(23,19,17,.5);border:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;place-items:center}
 .play::after{content:"";border-left:13px solid var(--cream);border-block:8px solid transparent;margin-left:4px}
@@ -251,49 +251,56 @@ const SOCIALS = {
      thumbnail: "https://.../thumb.jpg", video: "https://.../video.mp4" },
 */
 const PROJECTS = [
-  // LONG FORM — rename the files in videos/long to match these names.
+  // LONG FORM
   {
     title: "YouTube Edit 01",
     category: "long",
     kind: "spec",
     style: "YouTube video editing",
-    video: "videos/long/long-01.mp4"
+    video: "https://www.youtube.com/embed/MOS3Lvtm5PY"
   },
   {
     title: "La cause n°1",
     category: "long",
     kind: "spec",
     style: "YouTube video editing",
-    video: "videos/long/long-02.mp4"
+    video: "https://drive.google.com/file/d/1cZAckGtPpMD0zPd6kjxDIL-ra72tbSsB/preview"
   },
   {
     title: "Gagner plus que tout le monde",
     category: "long",
     kind: "spec",
     style: "YouTube video editing",
-    video: "videos/long/long-03.mp4"
+    video: "https://drive.google.com/file/d/142uy_aQ2anQXnMja5KRiqhsaJJfec5mQ/preview"
   },
-  // SHORT FORM — rename the files in videos/short to match these names.
+  {
+    title: "Long Form Edit 03",
+    category: "long",
+    kind: "spec",
+    style: "YouTube video editing",
+    video: "https://drive.google.com/file/d/1WYxwWZx_lz2DbzHVvJ6VuRt-lPfFKBsh/preview"
+  },
+  // SHORT FORM
   {
     title: "Short Form Edit 01",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    video: "videos/short/short-01.mp4"
+    video: "https://drive.google.com/file/d/1KqhfXcKJrtddNUiqvbRlhvKRqFg8t_hz/preview"
   },
   {
     title: "Short Form Edit 02",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    video: "videos/short/short-02.mp4"
+    video: "https://drive.google.com/file/d/1JzFV8ZOaRMjfJ2ak_83M3LOb1FCL4H7U/preview"
   },
   {
     title: "Short Form Edit 03",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    video: "videos/short/short-03.mp4"
+    video: "https://drive.google.com/file/d/1LLIyJk5SiS23-r4IZg2qCatptHpX9ZuN/preview"
   }
 ];
 
@@ -364,24 +371,43 @@ const modal = $('#modal'), modalBox = $('#modalBox');
 const empty = msg => h('div', { class: 'empty rv' }, msg);
 
 /* One shared player: it is pre-loaded when you hover/touch a card, so it starts instantly */
-const player = h('video', { controls: '', playsinline: '', preload: 'auto' });
+const player = h('video', { controls: '', playsinline: '', preload: 'metadata' });
 const cap = h('div', { class: 'cap' });
+function isEmbed(p) { return /^https?:\/\//i.test(p.video); }
 function warm(p) {
-  if (!player.paused || player.dataset.src === p.video) return;
+  // External embeds load only when opened, keeping the portfolio lightweight.
+  if (isEmbed(p) || !player.paused || player.dataset.src === p.video) return;
   player.dataset.src = p.video; player.src = p.video; player.load();
 }
 function openProject(p) {
-  closeAll();                                   /* stop every other video and its audio first */
-  if (player.dataset.src !== p.video) { player.dataset.src = p.video; player.src = p.video; }
-  if (p.thumbnail) player.poster = p.thumbnail; else player.removeAttribute('poster');
-  try { player.currentTime = 0; } catch (_) {}
+  closeAll();
+  let media;
+  if (isEmbed(p)) {
+    const frame = h('iframe', {
+      src: p.video,
+      title: p.title,
+      allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen',
+      allowfullscreen: '',
+      loading: 'eager',
+      referrerpolicy: 'strict-origin-when-cross-origin'
+    });
+    frame.style.cssText = 'width:min(960px,100%);aspect-ratio:16/9;border:0;border-radius:16px;background:#000';
+    media = frame;
+  } else {
+    if (player.dataset.src !== p.video) { player.dataset.src = p.video; player.src = p.video; }
+    if (p.thumbnail) player.poster = p.thumbnail; else player.removeAttribute('poster');
+    try { player.currentTime = 0; } catch (_) {}
+    media = player;
+  }
   cap.textContent = p.title;
-  modalBox.replaceChildren(player, cap);
+  modalBox.replaceChildren(media, cap);
   modal.classList.add('open'); document.body.style.overflow = 'hidden';
-  player.play().catch(() => {});
+  if (media === player) player.play().catch(() => {});
 }
 function closeModal() {
   player.pause();
+  const frame = modalBox.querySelector('iframe');
+  if (frame) frame.src = 'about:blank';
   modal.classList.remove('open'); document.body.style.overflow = '';
 }
 $('#closeModal').onclick = closeModal;
@@ -391,7 +417,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 function card(p) {
   const media = p.thumbnail
     ? h('img', { src: p.thumbnail, alt: p.title, loading: 'lazy' })
-    : h('video', { src: p.video + '#t=0.5', muted: '', playsinline: '', preload: 'metadata' });
+    : isEmbed(p)
+      ? h('div', { class: 'external-thumb', 'aria-label': 'Play ' + p.title })
+      : h('video', { src: p.video + '#t=0.5', muted: '', playsinline: '', preload: 'metadata' });
   const b = h('button', { class: 'card glass rv', type: 'button', onclick: () => openProject(p) },
     h('div', { class: 'thumb' }, media, h('span', { class: 'play' })),
     h('div', { class: 'info' },
