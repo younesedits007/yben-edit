@@ -69,7 +69,6 @@ nav .wrap{height:auto;padding:10px 0 8px;flex-wrap:wrap;row-gap:6px}
 .card:hover{transform:translateY(-4px);border-color:rgba(198,166,107,.5)}
 .thumb{position:relative;aspect-ratio:16/9;background:var(--bg2);overflow:hidden}
 .short .thumb{aspect-ratio:9/16}
-.drive-thumb{width:100%;height:100%;display:grid;place-items:center;background:#171717;color:#fff;font-size:2rem}
 .thumb img,.thumb video{width:100%;height:100%;object-fit:cover;transition:transform .6s}
 .card:hover .thumb img,.card:hover .thumb video{transform:scale(1.04)}
 .play{position:absolute;inset:0;margin:auto;width:52px;height:52px;border-radius:50%;background:rgba(23,19,17,.5);border:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;place-items:center}
@@ -252,55 +251,63 @@ const SOCIALS = {
      thumbnail: "https://.../thumb.jpg", video: "https://.../video.mp4" },
 */
 const PROJECTS = [
-  // LONG FORM — hosted on Google Drive.
-  {
-    title: "YouTube Edit 01",
-    category: "long",
-    kind: "spec",
-    style: "YouTube video editing",
-    thumbnail: "https://drive.google.com/thumbnail?id=1cZAckGtPpMD0zPd6kjxDIL-ra72tbSsB&sz=w800",
-    video: "https://drive.google.com/file/d/1cZAckGtPpMD0zPd6kjxDIL-ra72tbSsB/preview"
-  },
+  // LONG FORM — hosted on Google Drive / YouTube
   {
     title: "La cause n°1",
     category: "long",
     kind: "spec",
     style: "YouTube video editing",
-    thumbnail: "https://drive.google.com/thumbnail?id=142uy_aQ2anQXnMja5KRiqhsaJJfec5mQ&sz=w800",
-    video: "https://drive.google.com/file/d/142uy_aQ2anQXnMja5KRiqhsaJJfec5mQ/preview"
+    thumbnail: "https://drive.google.com/thumbnail?id=1cZAckGtPpMD0zPd6kjxDIL-ra72tbSsB&sz=w1000",
+    video: "https://drive.google.com/file/d/1cZAckGtPpMD0zPd6kjxDIL-ra72tbSsB/view?usp=sharing"
   },
   {
     title: "Gagner plus que tout le monde",
     category: "long",
     kind: "spec",
     style: "YouTube video editing",
-    thumbnail: "https://drive.google.com/thumbnail?id=1WYxwWZx_lz2DbzHVvJ6VuRt-lPfFKBsh&sz=w800",
-    video: "https://drive.google.com/file/d/1WYxwWZx_lz2DbzHVvJ6VuRt-lPfFKBsh/preview"
+    thumbnail: "https://drive.google.com/thumbnail?id=142uy_aQ2anQXnMja5KRiqhsaJJfec5mQ&sz=w1000",
+    video: "https://drive.google.com/file/d/142uy_aQ2anQXnMja5KRiqhsaJJfec5mQ/view?usp=sharing"
   },
-  // SHORT FORM — hosted on Google Drive.
+  {
+    title: "YouTube Edit 03",
+    category: "long",
+    kind: "spec",
+    style: "YouTube video editing",
+    thumbnail: "https://drive.google.com/thumbnail?id=1WYxwWZx_lz2DbzHVvJ6VuRt-lPfFKBsh&sz=w1000",
+    video: "https://drive.google.com/file/d/1WYxwWZx_lz2DbzHVvJ6VuRt-lPfFKBsh/view?usp=sharing"
+  },
+  {
+    title: "YouTube Edit 04",
+    category: "long",
+    kind: "spec",
+    style: "YouTube video editing",
+    thumbnail: "https://img.youtube.com/vi/MOS3Lvtm5PY/hqdefault.jpg",
+    video: "https://youtu.be/MOS3Lvtm5PY?si=m57CNJutdmeCEHCu"
+  },
+  // SHORT FORM — hosted on Google Drive
   {
     title: "Short Form Edit 01",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    thumbnail: "https://drive.google.com/thumbnail?id=1KqhfXcKJrtddNUiqvbRlhvKRqFg8t_hz&sz=w800",
-    video: "https://drive.google.com/file/d/1KqhfXcKJrtddNUiqvbRlhvKRqFg8t_hz/preview"
+    thumbnail: "https://drive.google.com/thumbnail?id=1KqhfXcKJrtddNUiqvbRlhvKRqFg8t_hz&sz=w1000",
+    video: "https://drive.google.com/file/d/1KqhfXcKJrtddNUiqvbRlhvKRqFg8t_hz/view?usp=sharing"
   },
   {
     title: "Short Form Edit 02",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    thumbnail: "https://drive.google.com/thumbnail?id=1JzFV8ZOaRMjfJ2ak_83M3LOb1FCL4H7U&sz=w800",
-    video: "https://drive.google.com/file/d/1JzFV8ZOaRMjfJ2ak_83M3LOb1FCL4H7U/preview"
+    thumbnail: "https://drive.google.com/thumbnail?id=1JzFV8ZOaRMjfJ2ak_83M3LOb1FCL4H7U&sz=w1000",
+    video: "https://drive.google.com/file/d/1JzFV8ZOaRMjfJ2ak_83M3LOb1FCL4H7U/view?usp=sharing"
   },
   {
     title: "Short Form Edit 03",
     category: "short",
     kind: "spec",
     style: "Short-form video editing",
-    thumbnail: "https://drive.google.com/thumbnail?id=1LLIyJk5SiS23-r4IZg2qCatptHpX9ZuN&sz=w800",
-    video: "https://drive.google.com/file/d/1LLIyJk5SiS23-r4IZg2qCatptHpX9ZuN/preview"
+    thumbnail: "https://drive.google.com/thumbnail?id=1LLIyJk5SiS23-r4IZg2qCatptHpX9ZuN&sz=w1000",
+    video: "https://drive.google.com/file/d/1LLIyJk5SiS23-r4IZg2qCatptHpX9ZuN/view?usp=sharing"
   }
 ];
 
@@ -368,25 +375,25 @@ const empty = msg => h('div', { class: 'empty rv' }, msg);
 /* One shared player: it is pre-loaded when you hover/touch a card, so it starts instantly */
 const player = h('video', { controls: '', playsinline: '', preload: 'auto' });
 const cap = h('div', { class: 'cap' });
-function isDrivePreview(url) { return typeof url === 'string' && /drive\.google\.com\/file\/d\//.test(url) && /\/preview(?:$|[?#])/.test(url); }
+function externalEmbedUrl(url) {
+  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  if (yt) return 'https://www.youtube-nocookie.com/embed/' + yt[1] + '?autoplay=1&rel=0';
+  const drive = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (drive) return 'https://drive.google.com/file/d/' + drive[1] + '/preview';
+  return null;
+}
 function warm(p) {
-  if (isDrivePreview(p.video) || !player.paused || player.dataset.src === p.video) return;
+  if (externalEmbedUrl(p.video)) return;
+  if (!player.paused || player.dataset.src === p.video) return;
   player.dataset.src = p.video; player.src = p.video; player.load();
 }
 function openProject(p) {
   closeAll();                                   /* stop every other video and its audio first */
   cap.textContent = p.title;
-  if (isDrivePreview(p.video)) {
-    const frame = h('iframe', {
-      src: p.video,
-      title: p.title,
-      allow: 'autoplay; fullscreen; picture-in-picture',
-      allowfullscreen: '',
-      loading: 'eager',
-      referrerpolicy: 'strict-origin-when-cross-origin'
-    });
-    frame.style.width = '100%'; frame.style.height = 'min(78vh, 720px)';
-    frame.style.border = '0'; frame.style.borderRadius = '16px'; frame.style.background = '#000';
+  const embedUrl = externalEmbedUrl(p.video);
+  if (embedUrl) {
+    const frame = h('iframe', { src: embedUrl, title: p.title, allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen', allowfullscreen: '', referrerpolicy: 'strict-origin-when-cross-origin' });
+    frame.style.width = '100%'; frame.style.aspectRatio = '16 / 9'; frame.style.border = '0'; frame.style.display = 'block';
     modalBox.replaceChildren(frame, cap);
   } else {
     if (player.dataset.src !== p.video) { player.dataset.src = p.video; player.src = p.video; }
@@ -400,7 +407,7 @@ function openProject(p) {
 function closeModal() {
   player.pause();
   const frame = modalBox.querySelector('iframe');
-  if (frame) frame.src = 'about:blank';
+  if (frame) frame.remove();
   modal.classList.remove('open'); document.body.style.overflow = '';
 }
 $('#closeModal').onclick = closeModal;
@@ -410,9 +417,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 function card(p) {
   const media = p.thumbnail
     ? h('img', { src: p.thumbnail, alt: p.title, loading: 'lazy' })
-    : isDrivePreview(p.video)
-      ? h('div', { class: 'drive-thumb', 'aria-label': p.title }, '▶')
-      : h('video', { src: p.video + '#t=0.5', muted: '', playsinline: '', preload: 'metadata' });
+    : h('video', { src: p.video + '#t=0.5', muted: '', playsinline: '', preload: 'metadata' });
   const b = h('button', { class: 'card glass rv', type: 'button', onclick: () => openProject(p) },
     h('div', { class: 'thumb' }, media, h('span', { class: 'play' })),
     h('div', { class: 'info' },
